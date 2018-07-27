@@ -204,6 +204,22 @@ RCT_EXPORT_METHOD(updateWeight:(NSDictionary *)input callback:(RCTResponseSender
     [self prestige_updateWeight:input callback:callback];
 }
 
+RCT_EXPORT_METHOD(updateWater:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback)
+{
+    [self prestige_updateWater:input callback:callback];
+}
+
+RCT_EXPORT_METHOD(updateMacros:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback)
+{
+    [self prestige_updateMacros:input callback:callback];
+}
+
+RCT_EXPORT_METHOD(clearMacros:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback)
+{
+    [self prestige_clearMacros:input callback:callback];
+}
+
+
 - (void)isHealthKitAvailable:(RCTResponseSenderBlock)callback
 {
     BOOL isAvailable = NO;
