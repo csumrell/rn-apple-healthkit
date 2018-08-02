@@ -18,6 +18,7 @@
 {
     //If User has not authorized writing weight, return out of method
     if ([self.healthStore authorizationStatusForType:[HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierBodyMass]] == HKAuthorizationStatusSharingDenied) {
+        callback(@[RCTMakeError(@"AHK Deauthorized Weight", nil, nil)]);
         return;
     }
     
@@ -31,13 +32,15 @@
     double weight = [RCTAppleHealthKit doubleValueFromOptions:input];
     HKQuantity *weightQuantity = [HKQuantity quantityWithUnit:unit doubleValue:weight];
     HKQuantitySample *weightSample = [HKQuantitySample quantitySampleWithType:weightType quantity:weightQuantity startDate:saveDate endDate:saveDate];
-    
+    __block BOOL sourceFound = false;
     //run first query to get our app source
     HKSourceQuery *sourceQuery = [[HKSourceQuery alloc] initWithSampleType:weightType samplePredicate:nil completionHandler:^(HKSourceQuery *query, NSSet *sources, NSError *error){
         for (HKSource *source in sources)
         {
+            
             if ([source.bundleIdentifier isEqualToString:@"com.prestigeworldwide.keto"])
             {
+                sourceFound = true;
                 [dataSources addObject:source];
                 NSPredicate *datePredicate = [RCTAppleHealthKit predicateForSamplesBetweenDates:startDate endDate:endDate];
                 NSPredicate *sourcesPredicate = [HKQuery predicateForObjectsFromSources:[NSSet setWithArray:dataSources]];
@@ -56,7 +59,7 @@
                     //save weight sample
                     [self.healthStore saveObject:weightSample withCompletion:^(BOOL success, NSError *error) {
                         if (!success) {
-                            callback(@[RCTMakeError(@"Error saving weight sample", error, nil)]);
+                            RCTMakeError(@"Error saving weight sample", error, nil);
                         }else{
                             callback(@[[NSNull null], @(weight)]);
                         }
@@ -64,23 +67,14 @@
                     return;
                 }];
                 [self.healthStore executeQuery:finalQuery];
-            }else{
-                //If there were no myketo sources, but other apps had saved weights before, then save the first weight
-                [self.healthStore saveObject:weightSample withCompletion:^(BOOL success, NSError *error) {
-                    if (!success) {
-                        callback(@[RCTMakeError(@"Error saving weight sample", error, nil)]);
-                    }else{
-                        callback(@[[NSNull null], @(weight)]);
-                    }
-                }];
             }
         }
         
-        //if no data ever saved for weight in HealthKit, save weight
-        if([sources count] == 0){
+        //if no data ever saved for weight by myketo, save weight
+        if([sources count] == 0 || sourceFound == false){
             [self.healthStore saveObject:weightSample withCompletion:^(BOOL success, NSError *error) {
                 if (!success) {
-                    callback(@[RCTMakeError(@"error saving the weight sample with no sources", error, nil)]);
+                    RCTMakeError(@"error saving the weight sample with no sources", error, nil);
                 }else{
                     callback(@[[NSNull null], @(weight)]);
                 }
@@ -96,6 +90,7 @@
     
     //If User has not authorized writing water, return out of method
     if ([self.healthStore authorizationStatusForType:[HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierDietaryWater]] == HKAuthorizationStatusSharingDenied) {
+        callback(@[RCTMakeError(@"AHK Deauthorized Water", nil, nil)]);
         return;
     }
     
@@ -106,6 +101,7 @@
     NSDate *endDate = [RCTAppleHealthKit dateFromOptions:input key:@"endDate" withDefault:[NSDate date]];
     NSDate *saveDate = [RCTAppleHealthKit dateFromOptions:input key:@"finalDate" withDefault:[NSDate date]];
     double waterValue = [RCTAppleHealthKit doubleValueFromOptions:input];
+    __block BOOL sourceFound = false;
     HKQuantitySample* waterSample = [HKQuantitySample quantitySampleWithType:waterType
                                                                     quantity:[HKQuantity quantityWithUnit:[HKUnit literUnit] doubleValue:waterValue]
                                                                    startDate:saveDate
@@ -119,6 +115,7 @@
         {
             if ([source.bundleIdentifier isEqualToString:@"com.prestigeworldwide.keto"])
             {
+                sourceFound = true;
                 [dataSources addObject:source];
                 NSPredicate *datePredicate = [RCTAppleHealthKit predicateForSamplesBetweenDates:startDate endDate:endDate];
                 NSPredicate *sourcesPredicate = [HKQuery predicateForObjectsFromSources:[NSSet setWithArray:dataSources]];
@@ -146,20 +143,11 @@
                     
                 }];
                 [self.healthStore executeQuery:updateWaterQuery];
-            }else{
-                //If our app has never saved water samples before (not a source), save first water sample
-                [self.healthStore saveObject:waterSample withCompletion:^(BOOL success, NSError *error) {
-                    if (!success) {
-                        callback(@[RCTMakeError(@"error saving the water sample with no app sources", error, nil)]);
-                    }else{
-                        callback(@[[NSNull null], @(waterValue)]);
-                    }
-                }];
             }
         }
         
         //if no data ever saved for water in  user's HealthKit, save water
-        if([sources count] == 0){
+        if([sources count] == 0 || sourceFound == false){
             [self.healthStore saveObject:waterSample withCompletion:^(BOOL success, NSError *error) {
                 if (!success) {
                     callback(@[RCTMakeError(@"error saving the water sample with no total sources", error, nil)]);
@@ -181,6 +169,7 @@
     NSString *mealNameValue = [RCTAppleHealthKit stringFromOptions:input key:@"mealType" withDefault:nil];
     NSDate *timeFoodWasConsumed = [RCTAppleHealthKit dateFromOptions:input key:@"finalDate" withDefault:[NSDate date]];
     HKCorrelationType *foodType = [HKCorrelationType correlationTypeForIdentifier:HKCorrelationTypeIdentifierFood];
+    __block BOOL sourceFound = false;
     double biotinValue = [RCTAppleHealthKit doubleFromOptions:input key:@"biotin" withDefault:(double)0];
     double caffeineValue = [RCTAppleHealthKit doubleFromOptions:input key:@"caffeine" withDefault:(double)0];
     double calciumValue = [RCTAppleHealthKit doubleFromOptions:input key:@"calcium" withDefault:(double)0];
@@ -531,6 +520,7 @@
     
     //Check if empty array (user de-authed healthkit). If so return out of method)
     if (!mySet || !mySet.count){
+        callback(@[RCTMakeError(@"AHK Deauthorized all", nil, nil)]);
         return;
     }
     
@@ -551,6 +541,7 @@
         {
             if ([source.bundleIdentifier isEqualToString:@"com.prestigeworldwide.keto"])
             {
+                sourceFound = true;
                 [dataSources addObject:source];
                 NSPredicate *datePredicate = [RCTAppleHealthKit predicateForSamplesBetweenDates:startDate endDate:endDate];
                 NSPredicate *sourcesPredicate = [HKQuery predicateForObjectsFromSources:[NSSet setWithArray:dataSources]];
@@ -598,20 +589,11 @@
                     
                 }];
                 [self.healthStore executeQuery:updateMacroQuery];
-            } else {
-                //if user has never saved any food data from myketo before, save first macro sample
-                [self.healthStore saveObject:food withCompletion:^(BOOL success, NSError *error) {
-                    if (!success) {
-                        callback(@[RCTMakeError(@"error saving the food sample with no app sources", error, nil)]);
-                    }else{
-                        callback(@[[NSNull null], @(energyConsumedValue)]);
-                    }
-                }];
             }
         }
         
         // Save the food correlation to HealthKit if no sources were found ie user never saved healthkit data before for food //
-        if([sources count] == 0){
+        if([sources count] == 0 || sourceFound == false){
             [self.healthStore saveObject:food withCompletion:^(BOOL success, NSError *error) {
                 if (!success) {
                     callback(@[RCTMakeError(@"error saving the food sample with no sources at all", error, nil)]);
@@ -666,11 +648,10 @@
                                 }
                                 
                                 [self.healthStore deleteObject:foodCorrelation withCompletion:^(BOOL success, NSError *error) {
-                                    if (success) {
-                                        NSLog(@"Success. delete %@", [foodCorrelation.metadata valueForKey:HKMetadataKeyExternalUUID]);
-                                    }
-                                    else {
-                                        NSLog(@"delete: An error occured deleting the Correlation. In your app, try to handle this gracefully. The error was: %@.", error);
+                                    if (!success) {
+                                        callback(@[RCTMakeError(@"error saving the food sample with no sources at all", error, nil)]);
+                                    }else{
+                                        callback(@[[NSNull null], @"Deleted"]);
                                     }
                                 }];
                                 return;
