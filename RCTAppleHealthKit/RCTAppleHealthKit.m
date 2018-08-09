@@ -10,6 +10,7 @@
 #import "RCTAppleHealthKit+TypesAndPermissions.h"
 
 #import "RCTAppleHealthKit+Methods_MyKeto.h"
+#import "RCTAppleHealthKit+Methods_MacLovin.h"
 #import "RCTAppleHealthKit+Methods_Activity.h"
 #import "RCTAppleHealthKit+Methods_Body.h"
 #import "RCTAppleHealthKit+Methods_Fitness.h"
@@ -217,6 +218,26 @@ RCT_EXPORT_METHOD(updateMacros:(NSDictionary *)input callback:(RCTResponseSender
 RCT_EXPORT_METHOD(clearMacros:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback)
 {
     [self prestige_clearMacros:input callback:callback];
+}
+
+RCT_EXPORT_METHOD(mac_updateWeight:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback)
+{
+    [self maclovin_updateWeight:input callback:callback];
+}
+
+RCT_EXPORT_METHOD(mac_updateWater:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback)
+{
+    [self maclovin_updateWater:input callback:callback];
+}
+
+RCT_EXPORT_METHOD(mac_updateMacros:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback)
+{
+    [self maclovin_updateMacros:input callback:callback];
+}
+
+RCT_EXPORT_METHOD(mac_clearMacros:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback)
+{
+    [self maclovin_clearMacros:input callback:callback];
 }
 
 
