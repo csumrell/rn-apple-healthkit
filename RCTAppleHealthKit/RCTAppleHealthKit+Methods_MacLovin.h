@@ -13,6 +13,8 @@
 
 - (void)maclovin_updateWeight:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback;
 - (void)maclovin_updateWater:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback;
+- (void)maclovin_saveGlucose:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback;
+- (void)maclovin_deleteGlucose:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback;
 - (void)maclovin_updateMacros:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback;
 - (void)maclovin_clearMacros:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback;
 

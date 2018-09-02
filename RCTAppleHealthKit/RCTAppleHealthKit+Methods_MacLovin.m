@@ -666,4 +666,156 @@
     [self.healthStore executeQuery:sourceClearMacroQuery];
 }
 
+- (void)maclovin_saveGlucose:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback
+{
+    
+    //If User has not authorized writing water, return out of method
+    if ([self.healthStore authorizationStatusForType:[HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierBloodGlucose]] == HKAuthorizationStatusSharingDenied) {
+        callback(@[RCTMakeError(@"AHK Deauthorized Blood Glucose", nil, nil)]);
+        return;
+    }
+    
+    //declare query variables and build water sample to be saved
+    NSMutableArray *dataSources = [[NSMutableArray alloc] init];
+    HKQuantityType *bloodType = [HKQuantityType quantityTypeForIdentifier:HKQuantityTypeIdentifierBloodGlucose];
+    NSDate *startDate = [RCTAppleHealthKit dateFromOptions:input key:@"startDate" withDefault:nil];
+    NSDate *endDate = [RCTAppleHealthKit dateFromOptions:input key:@"endDate" withDefault:[NSDate date]];
+    NSDate *saveDate = [RCTAppleHealthKit dateFromOptions:input key:@"finalDate" withDefault:[NSDate date]];
+    double glucoseValue = [RCTAppleHealthKit doubleValueFromOptions:input];
+    __block BOOL sourceFound = false;
+    HKQuantitySample* glucoseSample = [HKQuantitySample quantitySampleWithType:bloodType
+                                                                    quantity:[HKQuantity quantityWithUnit:[HKUnit literUnit] doubleValue:glucoseValue]
+                                                                   startDate:saveDate
+                                                                     endDate:saveDate
+                                                                    metadata:nil];
+    
+    //run first query to get our app source
+    HKSourceQuery *sourceGlucoseQuery = [[HKSourceQuery alloc] initWithSampleType:bloodType samplePredicate:nil completionHandler:^(HKSourceQuery *query, NSSet *sources, NSError *error){
+        
+        for (HKSource *source in sources)
+        {
+            if ([source.bundleIdentifier isEqualToString:@"com.prestigeworldwide.maclovin"])
+            {
+                sourceFound = true;
+                [dataSources addObject:source];
+                NSPredicate *datePredicate = [RCTAppleHealthKit predicateForSamplesBetweenDates:startDate endDate:endDate];
+                NSPredicate *sourcesPredicate = [HKQuery predicateForObjectsFromSources:[NSSet setWithArray:dataSources]];
+                NSArray *subPredicates = [[NSArray alloc] initWithObjects:sourcesPredicate, datePredicate, nil];
+                NSCompoundPredicate *compoundPredicate = [NSCompoundPredicate andPredicateWithSubpredicates:subPredicates];
+                //run second query to get querey date's water entry
+                HKSampleQuery *updateGlucoseQuery = [[HKSampleQuery alloc] initWithSampleType:bloodType predicate:compoundPredicate limit:HKObjectQueryNoLimit sortDescriptors:nil resultsHandler:^(HKSampleQuery *query, NSArray *results, NSError *error) {
+                    if( [results firstObject] != nil ){
+                        //If there was a previously saved water sample on this date, delete it
+                        [self.healthStore deleteObject:[results firstObject] withCompletion:^(BOOL success, NSError * _Nullable error) {
+                            if (!success) {
+                                RCTMakeError(@"error deleting the water sample", error, nil);
+                            }
+                        }];
+                    }
+                    //Save the new water sample, regardless of deletion or not
+                    [self.healthStore saveObject:glucoseSample withCompletion:^(BOOL success, NSError *error) {
+                        if (!success) {
+                            callback(@[RCTMakeError(@"error saving the water sample with previous app sources", error, nil)]);
+                        }else{
+                            callback(@[[NSNull null], @(glucoseValue)]);
+                        }
+                    }];
+                    return;
+                    
+                }];
+                [self.healthStore executeQuery:updateGlucoseQuery];
+            }
+        }
+        
+        //if no data ever saved for water in  user's HealthKit, save water
+        if([sources count] == 0 || sourceFound == false){
+            [self.healthStore saveObject:glucoseSample withCompletion:^(BOOL success, NSError *error) {
+                if (!success) {
+                    callback(@[RCTMakeError(@"error saving the water sample with no total sources", error, nil)]);
+                }else{
+                    callback(@[[NSNull null], @(glucoseValue)]);
+                }
+            }];
+        }
+        
+    }];
+    [self.healthStore executeQuery:sourceGlucoseQuery];
+}
+
+- (void)maclovin_deleteGlucose:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback
+{
+    
+    //If User has not authorized writing water, return out of method
+    if ([self.healthStore authorizationStatusForType:[HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierBloodGlucose]] == HKAuthorizationStatusSharingDenied) {
+        callback(@[RCTMakeError(@"AHK Deauthorized Blood Glucose", nil, nil)]);
+        return;
+    }
+    
+    //declare query variables and build water sample to be saved
+    NSMutableArray *dataSources = [[NSMutableArray alloc] init];
+    HKQuantityType *bloodType = [HKQuantityType quantityTypeForIdentifier:HKQuantityTypeIdentifierBloodGlucose];
+    NSDate *startDate = [RCTAppleHealthKit dateFromOptions:input key:@"startDate" withDefault:nil];
+    NSDate *endDate = [RCTAppleHealthKit dateFromOptions:input key:@"endDate" withDefault:[NSDate date]];
+    NSDate *saveDate = [RCTAppleHealthKit dateFromOptions:input key:@"finalDate" withDefault:[NSDate date]];
+    double glucoseValue = [RCTAppleHealthKit doubleValueFromOptions:input];
+    __block BOOL sourceFound = false;
+    HKQuantitySample* glucoseSample = [HKQuantitySample quantitySampleWithType:bloodType
+                                                                    quantity:[HKQuantity quantityWithUnit:[HKUnit literUnit] doubleValue:glucoseValue]
+                                                                   startDate:saveDate
+                                                                     endDate:saveDate
+                                                                    metadata:nil];
+    
+    //run first query to get our app source
+    HKSourceQuery *sourceGlucoseQuery = [[HKSourceQuery alloc] initWithSampleType:bloodType samplePredicate:nil completionHandler:^(HKSourceQuery *query, NSSet *sources, NSError *error){
+        
+        for (HKSource *source in sources)
+        {
+            if ([source.bundleIdentifier isEqualToString:@"com.prestigeworldwide.maclovin"])
+            {
+                sourceFound = true;
+                [dataSources addObject:source];
+                NSPredicate *datePredicate = [RCTAppleHealthKit predicateForSamplesBetweenDates:startDate endDate:endDate];
+                NSPredicate *sourcesPredicate = [HKQuery predicateForObjectsFromSources:[NSSet setWithArray:dataSources]];
+                NSArray *subPredicates = [[NSArray alloc] initWithObjects:sourcesPredicate, datePredicate, nil];
+                NSCompoundPredicate *compoundPredicate = [NSCompoundPredicate andPredicateWithSubpredicates:subPredicates];
+                //run second query to get querey date's water entry
+                HKSampleQuery *updateGlucoseQuery = [[HKSampleQuery alloc] initWithSampleType:bloodType predicate:compoundPredicate limit:HKObjectQueryNoLimit sortDescriptors:nil resultsHandler:^(HKSampleQuery *query, NSArray *results, NSError *error) {
+                    if( [results firstObject] != nil ){
+                        //If there was a previously saved water sample on this date, delete it
+                        [self.healthStore deleteObject:[results firstObject] withCompletion:^(BOOL success, NSError * _Nullable error) {
+                            if (!success) {
+                                RCTMakeError(@"error deleting the water sample", error, nil);
+                            }
+                        }];
+                    }
+                    //Save the new water sample, regardless of deletion or not
+                    [self.healthStore deleteObject:glucoseSample withCompletion:^(BOOL success, NSError *error) {
+                        if (!success) {
+                            callback(@[RCTMakeError(@"error saving the water sample with previous app sources", error, nil)]);
+                        }else{
+                            callback(@[[NSNull null], @(glucoseValue)]);
+                        }
+                    }];
+                    return;
+                    
+                }];
+                [self.healthStore executeQuery:updateGlucoseQuery];
+            }
+        }
+        
+        //if no data ever saved for water in  user's HealthKit, save water
+        if([sources count] == 0 || sourceFound == false){
+            [self.healthStore saveObject:glucoseSample withCompletion:^(BOOL success, NSError *error) {
+                if (!success) {
+                    callback(@[RCTMakeError(@"error saving the water sample with no total sources", error, nil)]);
+                }else{
+                    callback(@[[NSNull null], @(glucoseValue)]);
+                }
+            }];
+        }
+        
+    }];
+    [self.healthStore executeQuery:sourceGlucoseQuery];
+}
+
 @end
