@@ -220,24 +220,34 @@ RCT_EXPORT_METHOD(clearMacros:(NSDictionary *)input callback:(RCTResponseSenderB
     [self prestige_clearMacros:input callback:callback];
 }
 
-RCT_EXPORT_METHOD(mac_updateWeight:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback)
+RCT_EXPORT_METHOD(maclovin_updateWeight:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback)
 {
     [self maclovin_updateWeight:input callback:callback];
 }
 
-RCT_EXPORT_METHOD(mac_updateWater:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback)
+RCT_EXPORT_METHOD(maclovin_updateWater:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback)
 {
     [self maclovin_updateWater:input callback:callback];
 }
 
-RCT_EXPORT_METHOD(mac_updateMacros:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback)
+RCT_EXPORT_METHOD(maclovin_updateMacros:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback)
 {
     [self maclovin_updateMacros:input callback:callback];
 }
 
-RCT_EXPORT_METHOD(mac_clearMacros:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback)
+RCT_EXPORT_METHOD(maclovin_clearMacros:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback)
 {
     [self maclovin_clearMacros:input callback:callback];
+}
+
+RCT_EXPORT_METHOD(maclovin_saveGlucose:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback)
+{
+    [self maclovin_saveGlucose:input callback:callback];
+}
+
+RCT_EXPORT_METHOD(maclovin_deleteGlucose:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback)
+{
+    [self maclovin_deleteGlucose:input callback:callback];
 }
 
 
