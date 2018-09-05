@@ -678,13 +678,15 @@
     //declare query variables and build water sample to be saved
     NSMutableArray *dataSources = [[NSMutableArray alloc] init];
     HKQuantityType *bloodType = [HKQuantityType quantityTypeForIdentifier:HKQuantityTypeIdentifierBloodGlucose];
+    HKUnit *mmoLPerL = [[HKUnit moleUnitWithMetricPrefix:HKMetricPrefixMilli molarMass:HKUnitMolarMassBloodGlucose] unitDividedByUnit:[HKUnit literUnit]];
+    
     NSDate *startDate = [RCTAppleHealthKit dateFromOptions:input key:@"startDate" withDefault:nil];
     NSDate *endDate = [RCTAppleHealthKit dateFromOptions:input key:@"endDate" withDefault:[NSDate date]];
     NSDate *saveDate = [RCTAppleHealthKit dateFromOptions:input key:@"finalDate" withDefault:[NSDate date]];
     double glucoseValue = [RCTAppleHealthKit doubleValueFromOptions:input];
     __block BOOL sourceFound = false;
     HKQuantitySample* glucoseSample = [HKQuantitySample quantitySampleWithType:bloodType
-                                                                    quantity:[HKQuantity quantityWithUnit:[HKUnit literUnit] doubleValue:glucoseValue]
+                                                                    quantity:[HKQuantity quantityWithUnit:mmoLPerL doubleValue:glucoseValue]
                                                                    startDate:saveDate
                                                                      endDate:saveDate
                                                                     metadata:nil];
@@ -756,14 +758,7 @@
     HKQuantityType *bloodType = [HKQuantityType quantityTypeForIdentifier:HKQuantityTypeIdentifierBloodGlucose];
     NSDate *startDate = [RCTAppleHealthKit dateFromOptions:input key:@"startDate" withDefault:nil];
     NSDate *endDate = [RCTAppleHealthKit dateFromOptions:input key:@"endDate" withDefault:[NSDate date]];
-    NSDate *saveDate = [RCTAppleHealthKit dateFromOptions:input key:@"finalDate" withDefault:[NSDate date]];
-    double glucoseValue = [RCTAppleHealthKit doubleValueFromOptions:input];
     __block BOOL sourceFound = false;
-    HKQuantitySample* glucoseSample = [HKQuantitySample quantitySampleWithType:bloodType
-                                                                    quantity:[HKQuantity quantityWithUnit:[HKUnit literUnit] doubleValue:glucoseValue]
-                                                                   startDate:saveDate
-                                                                     endDate:saveDate
-                                                                    metadata:nil];
     
     //run first query to get our app source
     HKSourceQuery *sourceGlucoseQuery = [[HKSourceQuery alloc] initWithSampleType:bloodType samplePredicate:nil completionHandler:^(HKSourceQuery *query, NSSet *sources, NSError *error){
@@ -788,30 +783,11 @@
                             }
                         }];
                     }
-                    //Save the new water sample, regardless of deletion or not
-                    [self.healthStore deleteObject:glucoseSample withCompletion:^(BOOL success, NSError *error) {
-                        if (!success) {
-                            callback(@[RCTMakeError(@"error saving the water sample with previous app sources", error, nil)]);
-                        }else{
-                            callback(@[[NSNull null], @(glucoseValue)]);
-                        }
-                    }];
                     return;
                     
                 }];
                 [self.healthStore executeQuery:updateGlucoseQuery];
             }
-        }
-        
-        //if no data ever saved for water in  user's HealthKit, save water
-        if([sources count] == 0 || sourceFound == false){
-            [self.healthStore saveObject:glucoseSample withCompletion:^(BOOL success, NSError *error) {
-                if (!success) {
-                    callback(@[RCTMakeError(@"error saving the water sample with no total sources", error, nil)]);
-                }else{
-                    callback(@[[NSNull null], @(glucoseValue)]);
-                }
-            }];
         }
         
     }];
