@@ -13,6 +13,8 @@
 
 - (void)prestige_updateWeight:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback;
 - (void)prestige_updateWater:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback;
+- (void)prestige_saveGlucose:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback;
+- (void)prestige_deleteGlucose:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback;
 - (void)prestige_updateMacros:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback;
 - (void)prestige_clearMacros:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback;
 

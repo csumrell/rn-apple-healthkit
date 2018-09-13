@@ -220,6 +220,16 @@ RCT_EXPORT_METHOD(clearMacros:(NSDictionary *)input callback:(RCTResponseSenderB
     [self prestige_clearMacros:input callback:callback];
 }
 
+RCT_EXPORT_METHOD(saveGlucose:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback)
+{
+    [self prestige_saveGlucose:input callback:callback];
+}
+
+RCT_EXPORT_METHOD(deleteGlucose:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback)
+{
+    [self prestige_deleteGlucose:input callback:callback];
+}
+
 RCT_EXPORT_METHOD(maclovin_updateWeight:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback)
 {
     [self maclovin_updateWeight:input callback:callback];
