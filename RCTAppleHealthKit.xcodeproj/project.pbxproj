@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		32813293210245F9000046A6 /* RCTAppleHealthKit+Methods_Dietary.m in Sources */ = {isa = PBXBuildFile; fileRef = 32813291210245F8000046A6 /* RCTAppleHealthKit+Methods_Dietary.m */; };
+		32D76B8221DC501000386422 /* RCTAppleHealthKit+Methods_MyKeto.m in Sources */ = {isa = PBXBuildFile; fileRef = 32D76B7F21DC501000386422 /* RCTAppleHealthKit+Methods_MyKeto.m */; };
+		32D76B8321DC501000386422 /* RCTAppleHealthKit+Methods_MacLovin.m in Sources */ = {isa = PBXBuildFile; fileRef = 32D76B8021DC501000386422 /* RCTAppleHealthKit+Methods_MacLovin.m */; };
 		3774C8911D2092F20000B3F3 /* RCTAppleHealthKit.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 3774C8901D2092F20000B3F3 /* RCTAppleHealthKit.h */; };
 		3774C8931D2092F20000B3F3 /* RCTAppleHealthKit.m in Sources */ = {isa = PBXBuildFile; fileRef = 3774C8921D2092F20000B3F3 /* RCTAppleHealthKit.m */; };
 		3774C89B1D2095450000B3F3 /* RCTAppleHealthKit+Queries.m in Sources */ = {isa = PBXBuildFile; fileRef = 3774C89A1D2095450000B3F3 /* RCTAppleHealthKit+Queries.m */; };
@@ -39,6 +41,10 @@
 /* Begin PBXFileReference section */
 		32813291210245F8000046A6 /* RCTAppleHealthKit+Methods_Dietary.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "RCTAppleHealthKit+Methods_Dietary.m"; sourceTree = "<group>"; };
 		32813292210245F8000046A6 /* RCTAppleHealthKit+Methods_Dietary.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "RCTAppleHealthKit+Methods_Dietary.h"; sourceTree = "<group>"; };
+		32D76B7E21DC501000386422 /* RCTAppleHealthKit+Methods_MacLovin.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "RCTAppleHealthKit+Methods_MacLovin.h"; sourceTree = "<group>"; };
+		32D76B7F21DC501000386422 /* RCTAppleHealthKit+Methods_MyKeto.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "RCTAppleHealthKit+Methods_MyKeto.m"; sourceTree = "<group>"; };
+		32D76B8021DC501000386422 /* RCTAppleHealthKit+Methods_MacLovin.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "RCTAppleHealthKit+Methods_MacLovin.m"; sourceTree = "<group>"; };
+		32D76B8121DC501000386422 /* RCTAppleHealthKit+Methods_MyKeto.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "RCTAppleHealthKit+Methods_MyKeto.h"; sourceTree = "<group>"; };
 		3774C88D1D2092F20000B3F3 /* libRCTAppleHealthKit.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libRCTAppleHealthKit.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		3774C8901D2092F20000B3F3 /* RCTAppleHealthKit.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RCTAppleHealthKit.h; sourceTree = "<group>"; };
 		3774C8921D2092F20000B3F3 /* RCTAppleHealthKit.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RCTAppleHealthKit.m; sourceTree = "<group>"; };
@@ -96,6 +102,10 @@
 		3774C88F1D2092F20000B3F3 /* RCTAppleHealthKit */ = {
 			isa = PBXGroup;
 			children = (
+				32D76B7E21DC501000386422 /* RCTAppleHealthKit+Methods_MacLovin.h */,
+				32D76B8021DC501000386422 /* RCTAppleHealthKit+Methods_MacLovin.m */,
+				32D76B8121DC501000386422 /* RCTAppleHealthKit+Methods_MyKeto.h */,
+				32D76B7F21DC501000386422 /* RCTAppleHealthKit+Methods_MyKeto.m */,
 				32813292210245F8000046A6 /* RCTAppleHealthKit+Methods_Dietary.h */,
 				32813291210245F8000046A6 /* RCTAppleHealthKit+Methods_Dietary.m */,
 				58C81E6E1F84F6970005DD48 /* RCTAppleHealthKit+Methods_Activity.h */,
@@ -183,11 +193,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				3774C89B1D2095450000B3F3 /* RCTAppleHealthKit+Queries.m in Sources */,
+				32D76B8221DC501000386422 /* RCTAppleHealthKit+Methods_MyKeto.m in Sources */,
 				3774C8A11D20A6B90000B3F3 /* RCTAppleHealthKit+Utils.m in Sources */,
 				37837E7D1DCFE270000201A0 /* RCTAppleHealthKit+Methods_Sleep.m in Sources */,
 				3774C8D41D20C6390000B3F3 /* RCTAppleHealthKit+Methods_Body.m in Sources */,
 				61232F931E303758000A5026 /* RCTAppleHealthKit+Methods_Mindfulness.m in Sources */,
 				32813293210245F9000046A6 /* RCTAppleHealthKit+Methods_Dietary.m in Sources */,
+				32D76B8321DC501000386422 /* RCTAppleHealthKit+Methods_MacLovin.m in Sources */,
 				64E0E73F1D37947B00EAB905 /* RCTAppleHealthKit+Methods_Results.m in Sources */,
 				64C42D4A1D351A8800A0A8F7 /* RCTAppleHealthKit+Methods_Vitals.m in Sources */,
 				3774C8931D2092F20000B3F3 /* RCTAppleHealthKit.m in Sources */,
