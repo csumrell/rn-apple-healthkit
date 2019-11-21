@@ -18,22 +18,17 @@
 {
     HKQuantityType *weightType = [HKQuantityType quantityTypeForIdentifier:HKQuantityTypeIdentifierBodyMass];
 
-    HKUnit *unit = [RCTAppleHealthKit hkUnitFromOptions:input];
-    if(unit == nil){
-        unit = [HKUnit poundUnit];
-    }
-
+    HKUnit *unit = [RCTAppleHealthKit hkUnitFromOptions:input key:@"unit" withDefault:[HKUnit poundUnit]];
+    
     [self fetchMostRecentQuantitySampleOfType:weightType
                                     predicate:nil
                                    completion:^(HKQuantity *mostRecentQuantity, NSDate *startDate, NSDate *endDate, NSError *error) {
         if (!mostRecentQuantity) {
-            NSLog(@"error getting latest weight: %@", error);
-            callback(@[RCTMakeError(@"error getting latest weight", error, nil)]);
+            callback(@[RCTJSErrorFromNSError(error)]);
         }
         else {
             // Determine the weight in the required unit.
             double usersWeight = [mostRecentQuantity doubleValueForUnit:unit];
-
             NSDictionary *response = @{
                     @"value" : @(usersWeight),
                     @"startDate" : [RCTAppleHealthKit buildISO8601StringFromDate:startDate],
@@ -60,8 +55,7 @@
         return;
     }
     NSPredicate * predicate = [RCTAppleHealthKit predicateForSamplesBetweenDates:startDate endDate:endDate];
-    
-    
+
     [self fetchQuantitySamplesOfType:weightType
                                 unit:unit
                            predicate:predicate
@@ -72,8 +66,7 @@
             callback(@[[NSNull null], results]);
             return;
         } else {
-            NSLog(@"error getting weight samples: %@", error);
-            callback(@[RCTMakeError(@"error getting weight samples", nil, nil)]);
+            callback(@[RCTJSErrorFromNSError(error)]);
             return;
         }
     }];
@@ -83,113 +76,47 @@
 - (void)body_saveWeight:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback
 {
     double weight = [RCTAppleHealthKit doubleValueFromOptions:input];
-    NSDate *startDate = [RCTAppleHealthKit dateFromOptions:input key:@"startDate" withDefault:[NSDate date]];
-    NSDate *endDate = [RCTAppleHealthKit dateFromOptions:input key:@"endDate" withDefault:[NSDate date]];
+    NSDate *sampleDate = [RCTAppleHealthKit dateFromOptions:input key:@"startDate" withDefault:[NSDate date]];
     HKUnit *unit = [RCTAppleHealthKit hkUnitFromOptions:input key:@"unit" withDefault:[HKUnit poundUnit]];
 
     HKQuantity *weightQuantity = [HKQuantity quantityWithUnit:unit doubleValue:weight];
     HKQuantityType *weightType = [HKQuantityType quantityTypeForIdentifier:HKQuantityTypeIdentifierBodyMass];
-    HKQuantitySample *weightSample = [HKQuantitySample quantitySampleWithType:weightType quantity:weightQuantity startDate:startDate endDate:endDate];
+    HKQuantitySample *weightSample = [HKQuantitySample quantitySampleWithType:weightType quantity:weightQuantity startDate:sampleDate endDate:sampleDate];
 
     [self.healthStore saveObject:weightSample withCompletion:^(BOOL success, NSError *error) {
         if (!success) {
-            NSLog(@"error saving the weight sample: %@", error);
-            callback(@[RCTMakeError(@"error saving the weight sample", error, nil)]);
+            callback(@[RCTJSErrorFromNSError(error)]);
             return;
         }
         callback(@[[NSNull null], @(weight)]);
     }];
 }
 
-- (void)body_deleteWeight:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback
-{
 
-    NSMutableArray *dataSources = [[NSMutableArray alloc] init];
-    HKQuantityType *weightType = [HKQuantityType quantityTypeForIdentifier:HKQuantityTypeIdentifierBodyMass];
-    HKUnit *unit = [RCTAppleHealthKit hkUnitFromOptions:input key:@"unit" withDefault:[HKUnit poundUnit]];
-    NSUInteger limit = [RCTAppleHealthKit uintFromOptions:input key:@"limit" withDefault:HKObjectQueryNoLimit];
-    BOOL ascending = [RCTAppleHealthKit boolFromOptions:input key:@"ascending" withDefault:false];
-    NSDate *startDate = [RCTAppleHealthKit dateFromOptions:input key:@"startDate" withDefault:nil];
-    NSDate *endDate = [RCTAppleHealthKit dateFromOptions:input key:@"endDate" withDefault:[NSDate date]];
-    
-    HKSourceQuery *sourceQuery = [[HKSourceQuery alloc] initWithSampleType:weightType                              samplePredicate:nil completionHandler:^(HKSourceQuery *query, NSSet *sources, NSError *error)                           {
-        for (HKSource *source in sources)
-        {
-            if ([source.bundleIdentifier isEqualToString:@"com.prestigeworldwide.keto"])
-            {
-                [dataSources addObject:source];
-                NSPredicate *datePredicate = [RCTAppleHealthKit predicateForSamplesBetweenDates:startDate endDate:endDate];
-                NSPredicate *sourcesPredicate = [HKQuery predicateForObjectsFromSources:[NSSet setWithArray:dataSources]];
-                NSArray *subPredicates = [[NSArray alloc] initWithObjects:sourcesPredicate, datePredicate, nil];
-                NSCompoundPredicate *compoundPredicate = [NSCompoundPredicate andPredicateWithSubpredicates:subPredicates];
-                
-               HKSampleQuery *finalQuery = [[HKSampleQuery alloc] initWithSampleType:weightType predicate:compoundPredicate limit:HKObjectQueryNoLimit sortDescriptors:nil resultsHandler:^(HKSampleQuery *query, NSArray *results, NSError *error) {
-                    if( [results firstObject] != nil ){
-                        
-                        [self.healthStore deleteObject:[results firstObject] withCompletion:^(BOOL success, NSError * _Nullable error) {
-                            RCTLogInfo(@"Successfully got results %@", results);
-                            if (success) {
-                                callback(@[[NSNull null], results]);
-                                RCTLogInfo(@"Successfully deleted entry from health kit %@", results);
-                            } else {
-                                RCTMakeError(@"error deleting the weight sample", error, nil);
-                            }
-                        }];
-                        return;
-                    } else {
-                        NSLog(@"error getting weight samples: %@", error);
-                        callback(@[RCTMakeError(@"no weight samples found for this date", nil, nil)]);
-                        return;
-                    }
-                }];
-                 [self.healthStore executeQuery:finalQuery];
-            }
+- (void)body_getLatestBodyMassIndex:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback
+{
+    HKQuantityType *bmiType = [HKQuantityType quantityTypeForIdentifier:HKQuantityTypeIdentifierBodyMassIndex];
+
+    [self fetchMostRecentQuantitySampleOfType:bmiType
+                                    predicate:nil
+                                   completion:^(HKQuantity *mostRecentQuantity, NSDate *startDate, NSDate *endDate, NSError *error) {
+        if (!mostRecentQuantity) {
+            callback(@[RCTJSErrorFromNSError(error)]);
+        }
+        else {
+            // Determine the bmi in the required unit.
+            HKUnit *countUnit = [HKUnit countUnit];
+            double bmi = [mostRecentQuantity doubleValueForUnit:countUnit];
+
+            NSDictionary *response = @{
+                    @"value" : @(bmi),
+                    @"startDate" : [RCTAppleHealthKit buildISO8601StringFromDate:startDate],
+                    @"endDate" : [RCTAppleHealthKit buildISO8601StringFromDate:endDate],
+            };
+
+            callback(@[[NSNull null], response]);
         }
     }];
-    [self.healthStore executeQuery:sourceQuery];
-}
-
-- (void)body_getSources:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback
-{
-    NSMutableArray *dataSources = [[NSMutableArray alloc] init];
-    HKQuantityType *weightType = [HKQuantityType quantityTypeForIdentifier:HKQuantityTypeIdentifierBodyMass];
-    HKUnit *unit = [RCTAppleHealthKit hkUnitFromOptions:input key:@"unit" withDefault:[HKUnit poundUnit]];
-    NSUInteger limit = [RCTAppleHealthKit uintFromOptions:input key:@"limit" withDefault:HKObjectQueryNoLimit];
-    BOOL ascending = [RCTAppleHealthKit boolFromOptions:input key:@"ascending" withDefault:false];
-    NSDate *startDate = [RCTAppleHealthKit dateFromOptions:input key:@"startDate" withDefault:nil];
-    NSDate *endDate = [RCTAppleHealthKit dateFromOptions:input key:@"endDate" withDefault:[NSDate date]];
-
-    HKSourceQuery *sourceQuery = [[HKSourceQuery alloc] initWithSampleType:weightType                              samplePredicate:nil completionHandler:^(HKSourceQuery *query, NSSet *sources, NSError *error)                           {
-         RCTLogInfo(@"Pretending to create an event %@", sources);
-              for (HKSource *source in sources)
-              {
-                  if ([source.bundleIdentifier isEqualToString:@"com.prestigeworldwide.keto"])
-                  {
-                    [dataSources addObject:source];
-                    NSPredicate *datePredicate = [RCTAppleHealthKit predicateForSamplesBetweenDates:startDate endDate:endDate];
-                    NSPredicate *sourcesPredicate = [HKQuery predicateForObjectsFromSources:[NSSet setWithArray:dataSources]];
-                    NSArray *subPredicates = [[NSArray alloc] initWithObjects:sourcesPredicate, datePredicate, nil];
-                    NSCompoundPredicate *compoundPredicate = [NSCompoundPredicate andPredicateWithSubpredicates:subPredicates];
-                    
-                    [self fetchQuantitySamplesOfType:weightType unit:unit predicate:compoundPredicate                                      ascending:ascending limit:limit completion:^(NSArray *results, NSError *error) {
-                                if(results){
-                                    callback(@[[NSNull null], results]);
-                                    RCTLogInfo(@"Pretending to create an event %@", results);
-                                    return;
-                                } else {
-                                    NSLog(@"error getting weight samples: %@", error);
-                                    callback(@[RCTMakeError(@"error getting weight samples", nil, nil)]);
-                                    return;
-                                }
-                      }];
-                      
-                  }
-              }
-        }];
-    
-    
-    [self.healthStore executeQuery:sourceQuery];
-    
 }
 
 
@@ -205,8 +132,7 @@
 
     [self.healthStore saveObject:bmiSample withCompletion:^(BOOL success, NSError *error) {
         if (!success) {
-            NSLog(@"error saving BMI sample: %@.", error);
-            callback(@[RCTMakeError(@"error saving BMI sample", error, nil)]);
+            callback(@[RCTJSErrorFromNSError(error)]);
             return;
         }
         callback(@[[NSNull null], @(bmi)]);
@@ -217,11 +143,7 @@
 - (void)body_getLatestHeight:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback
 {
     HKQuantityType *heightType = [HKQuantityType quantityTypeForIdentifier:HKQuantityTypeIdentifierHeight];
-
-    HKUnit *unit = [RCTAppleHealthKit hkUnitFromOptions:input];
-    if(unit == nil){
-        unit = [HKUnit inchUnit];
-    }
+    HKUnit *unit = [RCTAppleHealthKit hkUnitFromOptions:input key:@"unit" withDefault:[HKUnit inchUnit]];;
 
     [self fetchMostRecentQuantitySampleOfType:heightType
                                     predicate:nil
@@ -271,8 +193,7 @@
           callback(@[[NSNull null], results]);
           return;
         } else {
-          NSLog(@"error getting height samples: %@", error);
-          callback(@[RCTMakeError(@"error getting height samples", error, nil)]);
+          callback(@[RCTJSErrorFromNSError(error)]);
           return;
         }
     }];
@@ -283,11 +204,7 @@
 {
     double height = [RCTAppleHealthKit doubleValueFromOptions:input];
     NSDate *sampleDate = [RCTAppleHealthKit dateFromOptionsDefaultNow:input];
-
-    HKUnit *heightUnit = [RCTAppleHealthKit hkUnitFromOptions:input];
-    if(heightUnit == nil){
-        heightUnit = [HKUnit inchUnit];
-    }
+    HKUnit *heightUnit = [RCTAppleHealthKit hkUnitFromOptions:input key:@"unit" withDefault:[HKUnit inchUnit]];
 
     HKQuantity *heightQuantity = [HKQuantity quantityWithUnit:heightUnit doubleValue:height];
     HKQuantityType *heightType = [HKQuantityType quantityTypeForIdentifier:HKQuantityTypeIdentifierHeight];
@@ -295,8 +212,7 @@
 
     [self.healthStore saveObject:heightSample withCompletion:^(BOOL success, NSError *error) {
         if (!success) {
-            NSLog(@"error saving height sample: %@", error);
-            callback(@[RCTMakeError(@"error saving height sample", error, nil)]);
+            callback(@[RCTJSErrorFromNSError(error)]);
             return;
         }
         callback(@[[NSNull null], @(height)]);
@@ -312,8 +228,7 @@
                                     predicate:nil
                                    completion:^(HKQuantity *mostRecentQuantity, NSDate *startDate, NSDate *endDate, NSError *error) {
         if (!mostRecentQuantity) {
-            NSLog(@"error getting latest body fat percentage: %@", error);
-            callback(@[RCTMakeError(@"error getting latest body fat percentage", error, nil)]);
+            callback(@[RCTJSErrorFromNSError(error)]);
         }
         else {
             // Determine the weight in the required unit.
@@ -334,6 +249,62 @@
 }
 
 
+- (void)body_getBodyFatPercentageSamples:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback
+{
+    HKQuantityType *bodyFatPercentType = [HKQuantityType quantityTypeForIdentifier:HKQuantityTypeIdentifierBodyFatPercentage];
+    
+    HKUnit *unit = [HKUnit percentUnit];
+    NSUInteger limit = [RCTAppleHealthKit uintFromOptions:input key:@"limit" withDefault:HKObjectQueryNoLimit];
+    BOOL ascending = [RCTAppleHealthKit boolFromOptions:input key:@"ascending" withDefault:false];
+    NSDate *startDate = [RCTAppleHealthKit dateFromOptions:input key:@"startDate" withDefault:nil];
+    NSDate *endDate = [RCTAppleHealthKit dateFromOptions:input key:@"endDate" withDefault:[NSDate date]];
+    if(startDate == nil){
+        callback(@[RCTMakeError(@"startDate is required in options", nil, nil)]);
+        return;
+    }
+    NSPredicate * predicate = [RCTAppleHealthKit predicateForSamplesBetweenDates:startDate endDate:endDate];
+    
+    [self fetchQuantitySamplesOfType:bodyFatPercentType
+                                unit:unit
+                           predicate:predicate
+                           ascending:ascending
+                               limit:limit
+                          completion:^(NSArray *results, NSError *error) {
+                              if(results){
+                                  callback(@[[NSNull null], results]);
+                                  return;
+                              } else {
+                                  NSLog(@"error getting body fat percentage samples: %@", error);
+                                  callback(@[RCTMakeError(@"error getting body fat percentage samples", nil, nil)]);
+                                  return;
+                              }
+                          }];
+}
+
+
+- (void)body_saveBodyFatPercentage:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback
+{
+    double percentage = [RCTAppleHealthKit doubleValueFromOptions:input];
+    NSDate *sampleDate = [RCTAppleHealthKit dateFromOptionsDefaultNow:input];
+    HKUnit *unit = [HKUnit percentUnit];
+    
+    percentage = percentage / 100;
+
+    HKQuantity *bodyFatPercentQuantity = [HKQuantity quantityWithUnit:unit doubleValue:percentage];
+    HKQuantityType *bodyFatPercentType = [HKQuantityType quantityTypeForIdentifier:HKQuantityTypeIdentifierBodyFatPercentage];
+    HKQuantitySample *bodyFatPercentSample = [HKQuantitySample quantitySampleWithType:bodyFatPercentType quantity:bodyFatPercentQuantity startDate:sampleDate endDate:sampleDate];
+    
+    [self.healthStore saveObject:bodyFatPercentSample withCompletion:^(BOOL success, NSError *error) {
+        if (!success) {
+            NSLog(@"error saving body fat percent sample: %@", error);
+            callback(@[RCTMakeError(@"error saving body fat percent sample", error, nil)]);
+            return;
+        }
+        callback(@[[NSNull null], @(percentage)]);
+    }];
+}
+
+
 - (void)body_getLatestLeanBodyMass:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback
 {
     HKQuantityType *leanBodyMassType = [HKQuantityType quantityTypeForIdentifier:HKQuantityTypeIdentifierLeanBodyMass];
@@ -342,8 +313,7 @@
                                     predicate:nil
                                    completion:^(HKQuantity *mostRecentQuantity, NSDate *startDate, NSDate *endDate, NSError *error) {
         if (!mostRecentQuantity) {
-            NSLog(@"error getting latest lean body mass: %@", error);
-            callback(@[RCTMakeError(@"error getting latest lean body mass", error, nil)]);
+            callback(@[RCTJSErrorFromNSError(error)]);
         }
         else {
             HKUnit *weightUnit = [HKUnit poundUnit];
@@ -357,6 +327,60 @@
 
             callback(@[[NSNull null], response]);
         }
+    }];
+}
+
+
+- (void)body_getLeanBodyMassSamples:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback
+{
+    HKQuantityType *leanBodyMassType = [HKQuantityType quantityTypeForIdentifier:HKQuantityTypeIdentifierLeanBodyMass];
+    
+    HKUnit *unit = [RCTAppleHealthKit hkUnitFromOptions:input key:@"unit" withDefault:[HKUnit poundUnit]];
+    NSUInteger limit = [RCTAppleHealthKit uintFromOptions:input key:@"limit" withDefault:HKObjectQueryNoLimit];
+    BOOL ascending = [RCTAppleHealthKit boolFromOptions:input key:@"ascending" withDefault:false];
+    NSDate *startDate = [RCTAppleHealthKit dateFromOptions:input key:@"startDate" withDefault:nil];
+    NSDate *endDate = [RCTAppleHealthKit dateFromOptions:input key:@"endDate" withDefault:[NSDate date]];
+    if(startDate == nil){
+        callback(@[RCTMakeError(@"startDate is required in options", nil, nil)]);
+        return;
+    }
+    NSPredicate * predicate = [RCTAppleHealthKit predicateForSamplesBetweenDates:startDate endDate:endDate];
+    
+    [self fetchQuantitySamplesOfType:leanBodyMassType
+                                unit:unit
+                           predicate:predicate
+                           ascending:ascending
+                               limit:limit
+                          completion:^(NSArray *results, NSError *error) {
+                              if(results){
+                                  callback(@[[NSNull null], results]);
+                                  return;
+                              } else {
+                                  NSLog(@"error getting lean body mass samples: %@", error);
+                                  callback(@[RCTMakeError(@"error getting lean body mass samples", nil, nil)]);
+                                  return;
+                              }
+                          }];
+}
+
+
+- (void)body_saveLeanBodyMass:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback
+{
+    double mass = [RCTAppleHealthKit doubleValueFromOptions:input];
+    NSDate *sampleDate = [RCTAppleHealthKit dateFromOptions:input key:@"startDate" withDefault:[NSDate date]];
+    HKUnit *unit = [RCTAppleHealthKit hkUnitFromOptions:input key:@"unit" withDefault:[HKUnit poundUnit]];
+    
+    HKQuantity *massQuantity = [HKQuantity quantityWithUnit:unit doubleValue:mass];
+    HKQuantityType *massType = [HKQuantityType quantityTypeForIdentifier:HKQuantityTypeIdentifierLeanBodyMass];
+    HKQuantitySample *massSample = [HKQuantitySample quantitySampleWithType:massType quantity:massQuantity startDate:sampleDate endDate:sampleDate];
+    
+    [self.healthStore saveObject:massSample withCompletion:^(BOOL success, NSError *error) {
+        if (!success) {
+            NSLog(@"error saving lean body mass sample: %@", error);
+            callback(@[RCTMakeError(@"error saving lean body mass sample", error, nil)]);
+            return;
+        }
+        callback(@[[NSNull null], @(mass)]);
     }];
 }
 

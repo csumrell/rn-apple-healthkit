@@ -380,7 +380,7 @@
             callback(@[RCTMakeError(@"An error occured saving the food sample", error, nil)]);
             return;
         }
-        callback(@[[NSNull null], @(energyConsumedValue)]);
+        callback(@[[NSNull null], @true]);
     }];
 }
 
@@ -388,11 +388,13 @@
 {
     NSDate *timeWaterWasConsumed = [RCTAppleHealthKit dateFromOptions:input key:@"date" withDefault:[NSDate date]];
     double waterValue = [RCTAppleHealthKit doubleFromOptions:input key:@"water" withDefault:(double)0];
+
     HKQuantitySample* water = [HKQuantitySample quantitySampleWithType:[HKQuantityType quantityTypeForIdentifier:HKQuantityTypeIdentifierDietaryWater]
                                                                 quantity:[HKQuantity quantityWithUnit:[HKUnit literUnit] doubleValue:waterValue]
                                                                 startDate:timeWaterWasConsumed
                                                                 endDate:timeWaterWasConsumed
                                                                 metadata:nil];
+
     // Save the water Sample to HealthKit //
     [self.healthStore saveObject:water withCompletion:^(BOOL success, NSError *error) {
         if (!success) {
@@ -400,9 +402,8 @@
             callback(@[RCTMakeError(@"An error occured saving the water sample", error, nil)]);
             return;
         }
-        callback(@[[NSNull null], @(waterValue)]);
+        callback(@[[NSNull null], @true]);
     }];
 }
-
 
 @end

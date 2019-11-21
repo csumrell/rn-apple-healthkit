@@ -1,41 +1,12 @@
 {
-  "_from": "rn-apple-healthkit",
-  "_id": "rn-apple-healthkit@0.6.4",
-  "_inBundle": false,
-  "_integrity": "sha512-uaNKrZVHmnVOregr9B8UQ+SSoH3ku/B/MIQxNy7j0Q8fzzosQYxXYebAcdSfFTCUUfDz5Hm5FoL8Oh8/IukWeA==",
-  "_location": "/rn-apple-healthkit",
-  "_phantomChildren": {},
-  "_requested": {
-    "type": "tag",
-    "registry": true,
-    "raw": "rn-apple-healthkit",
-    "name": "rn-apple-healthkit",
-    "escapedName": "rn-apple-healthkit",
-    "rawSpec": "",
-    "saveSpec": null,
-    "fetchSpec": "latest"
-  },
-  "_requiredBy": [
-    "#USER",
-    "/"
-  ],
-  "_resolved": "https://registry.npmjs.org/rn-apple-healthkit/-/rn-apple-healthkit-0.6.3.tgz",
-  "_shasum": "0dbd77a33930eb2496ad678cfb9cba29dcbfac6e",
-  "_spec": "rn-apple-healthkit",
-  "_where": "/Users/cam/myketo-rn",
-  "author": {
-    "name": "Cam Sumrell"
-  },
-  "bugs": {
-    "url": "https://github.com/csumrell/rn-apple-healthkit/issues"
-  },
-  "bundleDependencies": false,
-  "deprecated": false,
+  "name": "rn-apple-healthkit",
+  "version": "0.7.3",
   "description": "A React Native package for interacting with Apple HealthKit",
-  "devDependencies": {
-    "react-native": ">=0.40.0"
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/terrillo/rn-apple-healthkit.git"
   },
-  "homepage": "https://github.com/terrillo/rn-apple-healthkit",
   "keywords": [
     "Apple",
     "health-kit",
@@ -46,15 +17,17 @@
     "native",
     "ios"
   ],
+  "bugs": {
+    "url": "https://github.com/terrillo/rn-apple-healthkit/issues"
+  },
+  "homepage": "https://github.com/terrillo/rn-apple-healthkit",
+  "author": "Terrillo Walls",
   "license": "MIT",
-  "main": "index.js",
-  "name": "rn-apple-healthkit",
-  "peerDependencies": {
+  "devDependencies": {
+    "react": "16.8.3",
     "react-native": ">=0.40.0"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/csumrell/rn-apple-healthkit.git"
-  },
-  "version": "0.6.3"
+  "peerDependencies": {
+    "react-native": ">=0.40.0"
+  }
 }
