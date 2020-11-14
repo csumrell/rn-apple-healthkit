@@ -13,9 +13,9 @@
 
 @implementation RCTAppleHealthKit (Methods_MyKeto)
 
-
 - (void)prestige_updateWeight:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback
 {
+    NSString *bundleIdentifier = [[NSBundle mainBundle] bundleIdentifier];
     //If User has not authorized writing weight, return out of method
     if ([self.healthStore authorizationStatusForType:[HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierBodyMass]] == HKAuthorizationStatusSharingDenied) {
         callback(@[RCTMakeError(@"AHK Deauthorized Weight", nil, nil)]);
@@ -38,7 +38,7 @@
         for (HKSource *source in sources)
         {
             
-            if ([source.bundleIdentifier isEqualToString:@"com.prestigeworldwide.keto"])
+            if ([source.bundleIdentifier isEqualToString:bundleIdentifier])
             {
                 sourceFound = true;
                 [dataSources addObject:source];
@@ -87,7 +87,7 @@
 
 - (void)prestige_updateWater:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback
 {
-    
+    NSString *bundleIdentifier = [[NSBundle mainBundle] bundleIdentifier];
     //If User has not authorized writing water, return out of method
     if ([self.healthStore authorizationStatusForType:[HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierDietaryWater]] == HKAuthorizationStatusSharingDenied) {
         callback(@[RCTMakeError(@"AHK Deauthorized Water", nil, nil)]);
@@ -113,7 +113,7 @@
         
         for (HKSource *source in sources)
         {
-            if ([source.bundleIdentifier isEqualToString:@"com.prestigeworldwide.keto"])
+            if ([source.bundleIdentifier isEqualToString:bundleIdentifier])
             {
                 sourceFound = true;
                 [dataSources addObject:source];
@@ -163,6 +163,7 @@
 
 - (void)prestige_updateMacros:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback
 {
+    NSString *bundleIdentifier = [[NSBundle mainBundle] bundleIdentifier];
     NSDate *startDate = [RCTAppleHealthKit dateFromOptions:input key:@"startDate" withDefault:nil];
     NSDate *endDate = [RCTAppleHealthKit dateFromOptions:input key:@"endDate" withDefault:[NSDate date]];
     NSString *foodNameValue = [RCTAppleHealthKit stringFromOptions:input key:@"foodName" withDefault:nil];
@@ -539,7 +540,7 @@
         
         for (HKSource *source in sources)
         {
-            if ([source.bundleIdentifier isEqualToString:@"com.prestigeworldwide.keto"])
+            if ([source.bundleIdentifier isEqualToString:bundleIdentifier])
             {
                 sourceFound = true;
                 [dataSources addObject:source];
@@ -611,6 +612,7 @@
 
 - (void)prestige_clearMacros:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback
 {
+    NSString *bundleIdentifier = [[NSBundle mainBundle] bundleIdentifier];
     NSDate *startDate = [RCTAppleHealthKit dateFromOptions:input key:@"startDate" withDefault:nil];
     NSDate *endDate = [RCTAppleHealthKit dateFromOptions:input key:@"endDate" withDefault:[NSDate date]];
     HKCorrelationType *foodType = [HKCorrelationType correlationTypeForIdentifier:HKCorrelationTypeIdentifierFood];
@@ -623,7 +625,7 @@
         
         for (HKSource *source in sources)
         {
-            if ([source.bundleIdentifier isEqualToString:@"com.prestigeworldwide.keto"])
+            if ([source.bundleIdentifier isEqualToString:bundleIdentifier])
             {
                 [dataSources addObject:source];
                 NSPredicate *datePredicate = [RCTAppleHealthKit predicateForSamplesBetweenDates:startDate endDate:endDate];
@@ -668,6 +670,7 @@
 
 - (void)prestige_saveGlucose:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback
 {
+    NSString *bundleIdentifier = [[NSBundle mainBundle] bundleIdentifier];
     
     //If User has not authorized writing water, return out of method
     if ([self.healthStore authorizationStatusForType:[HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierBloodGlucose]] == HKAuthorizationStatusSharingDenied) {
@@ -696,7 +699,7 @@
         
         for (HKSource *source in sources)
         {
-            if ([source.bundleIdentifier isEqualToString:@"com.prestigeworldwide.keto"])
+            if ([source.bundleIdentifier isEqualToString:bundleIdentifier])
             {
                 sourceFound = true;
                 [dataSources addObject:source];
@@ -746,7 +749,7 @@
 
 - (void)prestige_deleteGlucose:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback
 {
-    
+    NSString *bundleIdentifier = [[NSBundle mainBundle] bundleIdentifier];
     //If User has not authorized writing water, return out of method
     if ([self.healthStore authorizationStatusForType:[HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierBloodGlucose]] == HKAuthorizationStatusSharingDenied) {
         callback(@[RCTMakeError(@"AHK Deauthorized Blood Glucose", nil, nil)]);
@@ -765,7 +768,7 @@
         
         for (HKSource *source in sources)
         {
-            if ([source.bundleIdentifier isEqualToString:@"com.prestigeworldwide.keto"])
+            if ([source.bundleIdentifier isEqualToString:bundleIdentifier])
             {
                 sourceFound = true;
                 [dataSources addObject:source];
