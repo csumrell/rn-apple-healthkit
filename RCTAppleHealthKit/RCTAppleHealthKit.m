@@ -266,6 +266,11 @@ RCT_EXPORT_METHOD(updateWater:(NSDictionary *)input callback:(RCTResponseSenderB
     [self prestige_updateWater:input callback:callback];
 }
 
+RCT_EXPORT_METHOD(deleteWater:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback)
+{
+    [self prestige_deleteWater:input callback:callback];
+}
+
 RCT_EXPORT_METHOD(updateMacros:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback)
 {
     [self prestige_updateMacros:input callback:callback];
