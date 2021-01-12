@@ -161,6 +161,56 @@
     [self.healthStore executeQuery:sourceWaterQuery];
 }
 
+- (void)prestige_deleteWater:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback
+{
+    NSString *bundleIdentifier = [[NSBundle mainBundle] bundleIdentifier];
+    //If User has not authorized writing water, return out of method
+    if ([self.healthStore authorizationStatusForType:[HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierDietaryWater]] == HKAuthorizationStatusSharingDenied) {
+        callback(@[RCTMakeError(@"AHK Deauthorized Water", nil, nil)]);
+        return;
+    }
+    
+    //declare query variables and build water sample to be saved
+    NSMutableArray *dataSources = [[NSMutableArray alloc] init];
+    HKQuantityType *waterType = [HKQuantityType quantityTypeForIdentifier:HKQuantityTypeIdentifierDietaryWater];
+    NSDate *startDate = [RCTAppleHealthKit dateFromOptions:input key:@"startDate" withDefault:nil];
+    NSDate *endDate = [RCTAppleHealthKit dateFromOptions:input key:@"endDate" withDefault:[NSDate date]];
+    __block BOOL sourceFound = false;
+    
+    //run first query to get our app source
+    HKSourceQuery *sourceWaterQuery = [[HKSourceQuery alloc] initWithSampleType:waterType samplePredicate:nil completionHandler:^(HKSourceQuery *query, NSSet *sources, NSError *error){
+        
+        for (HKSource *source in sources)
+        {
+            if ([source.bundleIdentifier isEqualToString:bundleIdentifier])
+            {
+                sourceFound = true;
+                [dataSources addObject:source];
+                NSPredicate *datePredicate = [RCTAppleHealthKit predicateForSamplesBetweenDates:startDate endDate:endDate];
+                NSPredicate *sourcesPredicate = [HKQuery predicateForObjectsFromSources:[NSSet setWithArray:dataSources]];
+                NSArray *subPredicates = [[NSArray alloc] initWithObjects:sourcesPredicate, datePredicate, nil];
+                NSCompoundPredicate *compoundPredicate = [NSCompoundPredicate andPredicateWithSubpredicates:subPredicates];
+                //run second query to get querey date's water entry
+                HKSampleQuery *updateWaterQuery = [[HKSampleQuery alloc] initWithSampleType:waterType predicate:compoundPredicate limit:HKObjectQueryNoLimit sortDescriptors:nil resultsHandler:^(HKSampleQuery *query, NSArray *results, NSError *error) {
+                    if( [results firstObject] != nil ){
+                        //If there was a previously saved water sample on this date, delete it
+                        [self.healthStore deleteObject:[results firstObject] withCompletion:^(BOOL success, NSError * _Nullable error) {
+                            if (!success) {
+                                RCTMakeError(@"error deleting the water sample", error, nil);
+                            }
+                        }];
+                    }
+                    return;
+                    
+                }];
+                [self.healthStore executeQuery:updateWaterQuery];
+            }
+        }
+        
+    }];
+    [self.healthStore executeQuery:sourceWaterQuery];
+}
+
 - (void)prestige_updateMacros:(NSDictionary *)input callback:(RCTResponseSenderBlock)callback
 {
     NSString *bundleIdentifier = [[NSBundle mainBundle] bundleIdentifier];
