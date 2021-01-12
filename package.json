@@ -5,7 +5,7 @@
   "main": "index.js",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/terrillo/rn-apple-healthkit.git"
+    "url": "git+https://github.com/csumrell/rn-apple-healthkit.git"
   },
   "keywords": [
     "Apple",
@@ -20,7 +20,7 @@
   "bugs": {
     "url": "https://github.com/terrillo/rn-apple-healthkit/issues"
   },
-  "homepage": "https://github.com/terrillo/rn-apple-healthkit",
+  "homepage": "https://github.com/csumrell/rn-apple-healthkit",
   "author": "Terrillo Walls",
   "license": "MIT",
   "devDependencies": {
